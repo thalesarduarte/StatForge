@@ -1,0 +1,41 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.16.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\Windows\Desktop\StatForge\frontend\.npmrc
+5 silly config load:file:C:\Users\Windows\.npmrc
+6 silly config load:file:C:\Users\Windows\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install
+8 verbose argv "install"
+9 verbose logfile logs-max:10 dir:C:\Users\Windows\Desktop\StatForge\.npm-cache\_logs\2026-03-16T16_35_56_885Z-
+10 verbose logfile C:\Users\Windows\Desktop\StatForge\.npm-cache\_logs\2026-03-16T16_35_56_885Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+13 http fetch GET https://registry.npmjs.org/npm attempt 1 failed with EACCES
+14 silly idealTree buildDeps
+15 silly fetch manifest @radix-ui/react-slot@^1.1.1
+16 silly packumentCache full:https://registry.npmjs.org/@radix-ui%2freact-slot cache-miss
+17 http fetch GET https://registry.npmjs.org/@radix-ui%2freact-slot attempt 1 failed with EACCES
+18 http fetch GET https://registry.npmjs.org/npm attempt 2 failed with EACCES
+19 http fetch GET https://registry.npmjs.org/@radix-ui%2freact-slot attempt 2 failed with EACCES
+20 http fetch GET https://registry.npmjs.org/npm attempt 3 failed with EACCES
+21 http fetch GET https://registry.npmjs.org/@radix-ui%2freact-slot attempt 3 failed with EACCES
+22 silly fetch manifest @tanstack/react-query@^5.66.0
+23 silly packumentCache full:https://registry.npmjs.org/@tanstack%2freact-query cache-miss
+24 http fetch GET https://registry.npmjs.org/@tanstack%2freact-query attempt 1 failed with EACCES
+25 http fetch GET https://registry.npmjs.org/@tanstack%2freact-query attempt 2 failed with EACCES
+26 http fetch GET https://registry.npmjs.org/@tanstack%2freact-query attempt 3 failed with EACCES
+27 silly fetch manifest clsx@^2.1.1
+28 silly packumentCache full:https://registry.npmjs.org/clsx cache-miss
+29 http fetch GET https://registry.npmjs.org/clsx attempt 1 failed with EACCES
+30 http fetch GET https://registry.npmjs.org/clsx attempt 2 failed with EACCES
+31 http fetch GET https://registry.npmjs.org/clsx attempt 3 failed with EACCES
+32 silly fetch manifest lucide-react@^0.474.0
+33 silly packumentCache full:https://registry.npmjs.org/lucide-react cache-miss
+34 http fetch GET https://registry.npmjs.org/lucide-react attempt 1 failed with EACCES
+35 http fetch GET https://registry.npmjs.org/lucide-react attempt 2 failed with EACCES
+36 http fetch GET https://registry.npmjs.org/lucide-react attempt 3 failed with EACCES
+37 silly fetch manifest react@^18.3.1
+38 silly packumentCache full:https://registry.npmjs.org/react cache-miss
+39 http fetch GET https://registry.npmjs.org/react attempt 1 failed with EACCES
+40 http fetch GET https://registry.npmjs.org/react attempt 2 failed with EACCES

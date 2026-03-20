@@ -1,11 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 
-const links = [
-  { to: "/", label: "Dashboard" },
-  { to: "/overwatch", label: "Overwatch" },
-  { to: "/valorant", label: "Valorant" },
-  { to: "/cs2", label: "CS2" },
-];
+import { gameModules } from "@/features/core/services/platform-service";
+
+const links = [{ path: "/", name: "Dashboard" }, ...gameModules.map((module) => ({ path: module.path, name: module.name }))];
 
 export function AppShell() {
   return (
@@ -21,8 +18,8 @@ export function AppShell() {
           <nav className="flex flex-wrap gap-2">
             {links.map((link) => (
               <NavLink
-                key={link.to}
-                to={link.to}
+                key={link.path}
+                to={link.path}
                 className={({ isActive }) =>
                   [
                     "rounded-full px-4 py-2 text-sm font-medium transition",
@@ -30,7 +27,7 @@ export function AppShell() {
                   ].join(" ")
                 }
               >
-                {link.label}
+                {link.name}
               </NavLink>
             ))}
           </nav>

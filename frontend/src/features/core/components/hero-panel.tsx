@@ -13,7 +13,7 @@ export function HeroPanel() {
           </h1>
           <p className="mt-4 max-w-2xl text-sm text-slate-300 sm:text-base">
             Frontend e backend desacoplados, módulos independentes por jogo e um core compartilhado para identidade,
-            comunidade, torneios, atividade e governança.
+            comunidade, torneios, atividade, favoritos, badges e governança.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button>Explorar módulos</Button>

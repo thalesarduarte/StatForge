@@ -13,3 +13,4 @@ class OverwatchProfile(Base, TimestampMixin):
     current_rank: Mapped[str] = mapped_column(String(50))
     main_hero: Mapped[str] = mapped_column(String(80))
     role_stats: Mapped[dict] = mapped_column(JSON, default=dict)
+    hero_stats: Mapped[dict] = mapped_column(JSON, default=dict)

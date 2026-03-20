@@ -13,3 +13,4 @@ class ValorantProfile(Base, TimestampMixin):
     current_rank: Mapped[str] = mapped_column(String(50))
     favorite_agents: Mapped[list[str]] = mapped_column(JSON, default=list)
     core_stats: Mapped[dict] = mapped_column(JSON, default=dict)
+    weapon_stats: Mapped[dict] = mapped_column(JSON, default=dict)

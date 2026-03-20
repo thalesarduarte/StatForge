@@ -1,19 +1,21 @@
 # StatForge
 
-StatForge e uma plataforma gamer modular para acompanhar perfis de jogadores, estatisticas, rankings, comparacoes, comentarios da comunidade, times, torneios, badges e integracoes com multiplos jogos.
+StatForge e um hub gamer multi-jogos com core compartilhado e modulos independentes por jogo. A plataforma foi organizada para escalar sem acoplamento indevido entre regras de Overwatch, Valorant, CS2, LoL e Fortnite.
 
 ## Stack
 
-- Frontend: React, Vite, TypeScript, Tailwind CSS, React Router, TanStack Query, base shadcn/ui
-- Backend: FastAPI, SQLAlchemy, Pydantic, PostgreSQL, Alembic, JWT Authentication
-- Infra: Docker, Docker Compose, variaveis de ambiente por app
+- Frontend: React, Vite, TypeScript, Tailwind CSS, React Router, TanStack Query e base shadcn/ui
+- Backend: FastAPI, PostgreSQL, SQLAlchemy, Pydantic, Alembic e JWT
+- Infra: Docker, Docker Compose e configuracao por `.env`
 
-## Estrutura
+## Arquitetura
 
 ```text
 backend/
   app/
     api/
+      routes/
+      responses.py
     core/
     db/
     models/
@@ -25,13 +27,14 @@ backend/
       overwatch/
       valorant/
       cs2/
+      lol/
+      fortnite/
 frontend/
   src/
     app/
-    pages/
     components/
+    pages/
     services/
-    hooks/
     types/
     utils/
     features/
@@ -39,33 +42,134 @@ frontend/
       overwatch/
       valorant/
       cs2/
+      lol/
+      fortnite/
 ```
 
-## Regras de arquitetura
+## Principios adotados
 
 - Tudo que e global da plataforma fica no core compartilhado.
-- Tudo que e especifico de cada jogo fica isolado dentro de `backend/app/modules/<game>` e `frontend/src/features/<game>`.
-- Frontend e backend ficam desacoplados para crescimento independente.
-- Modelos compartilhados de dados cobrem a plataforma base; extensoes especificas de jogo ficam em tabelas proprias por modulo.
+- Tudo que e especifico de jogo fica dentro de `backend/app/modules/<game>` e `frontend/src/features/<game>`.
+- Rotas, services, schemas, integracoes e componentes de cada jogo evoluem sem contaminar outros modulos.
+- Responses da API seguem envelope padronizado.
+- Frontend e backend continuam desacoplados e preparados para crescimento independente.
 
 ## Core compartilhado
 
-- Autenticacao com JWT
-- Usuarios e perfis publicos
-- Comentarios, likes e follows
-- Favoritos e feed preparados para expansao
-- Times, clas e torneios
-- Badges e painel admin inicial
+Dominios cobertos na base atual:
 
-## Modelagem inicial
+- autenticacao JWT
+- usuarios
+- perfis publicos
+- comentarios
+- likes em comentarios
+- seguir jogadores
+- favoritos
+- badges
+- times / clas
+- torneios
+- feed de atividade
+- painel admin inicial
 
-Tabelas compartilhadas criadas no bootstrap:
+## Modulos por jogo
+
+### Overwatch
+
+- perfil do jogador
+- ranks
+- heroes
+- mapas
+- modos
+- estatisticas por role
+- estatisticas por heroi
+- comparacao entre jogadores
+- main hero
+- historico recente
+
+### Valorant
+
+- perfil do jogador
+- rank
+- agents
+- mapas
+- armas
+- HS%
+- KDA
+- winrate
+- comparacao entre jogadores
+- historico recente
+
+### CS2
+
+- perfil do jogador
+- rank / elo
+- KD
+- HS%
+- ADR
+- mapas
+- armas
+- comparacao entre jogadores
+- historico recente
+
+### LoL
+
+- perfil do invocador
+- elo
+- champions
+- roles
+- KDA
+- winrate
+- historico recente
+- comparacao entre jogadores
+
+### Fortnite
+
+- perfil
+- partidas
+- vitorias
+- kills
+- KD
+- modos
+- historico
+- comparacao entre jogadores
+
+## Backend
+
+Padrao de endpoints por modulo:
+
+- `GET /api/v1/modules/<game>/overview/{handle}`
+- `GET /api/v1/modules/<game>/compare/{left}/{right}`
+- `GET /api/v1/modules/<game>/reference-data`
+- `GET /api/v1/modules/<game>/history/{handle}`
+
+Rotas centrais relevantes:
+
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
+- `GET /api/v1/users`
+- `GET/POST /api/v1/profiles`
+- `GET/POST /api/v1/comments`
+- `GET/POST /api/v1/comment-likes`
+- `GET/POST /api/v1/favorites`
+- `GET/POST /api/v1/follows`
+- `GET/POST /api/v1/teams`
+- `GET/POST /api/v1/tournaments`
+- `GET/POST /api/v1/badges`
+- `GET /api/v1/activity/feed`
+- `GET /api/v1/admin/summary`
+
+### Modelagem principal
+
+Tabelas compartilhadas previstas na base:
 
 - `users`
 - `profiles`
 - `comments`
 - `comment_likes`
+- `favorites`
 - `follows`
+- `activity_events`
 - `teams`
 - `tournaments`
 - `badges`
@@ -73,55 +177,40 @@ Tabelas compartilhadas criadas no bootstrap:
 - `game_stats`
 - `game_matches`
 
-Tabelas modulares iniciais:
+Tabelas modulares:
 
 - `overwatch_profiles`
 - `valorant_profiles`
 - `cs2_profiles`
-
-## Backend
-
-Principais rotas REST iniciais:
-
-- `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login`
-- `GET /api/v1/auth/me`
-- `GET/POST /api/v1/profiles`
-- `GET/POST /api/v1/comments`
-- `GET/POST /api/v1/follows`
-- `GET/POST /api/v1/teams`
-- `GET/POST /api/v1/tournaments`
-- `GET/POST /api/v1/badges`
-- `GET /api/v1/admin/summary`
-- `GET /api/v1/modules/overwatch/profiles/{handle}`
-- `GET /api/v1/modules/valorant/profiles/{handle}`
-- `GET /api/v1/modules/cs2/profiles/{handle}`
+- `lol_profiles`
+- `fortnite_profiles`
 
 ## Frontend
 
-O frontend inicia com:
+O frontend foi reorganizado como hub multi-game:
 
-- dashboard core da plataforma
-- paginas independentes por jogo
-- layout compartilhado e componentes base reutilizaveis
-- cliente HTTP centralizado
-- preparacao para consumo da API com TanStack Query
+- dashboard central com pilares do core
+- navegacao por modulo
+- pagina separada para cada jogo
+- hooks e services isolados por modulo
+- renderer compartilhado para paginas de jogo
+- integracao pronta para TanStack Query com fallback local
 
 ## Ambiente local
 
 ### Backend
 
-```bash
+```powershell
 cd backend
 python -m venv .venv
-.venv\\Scripts\\activate
+.venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
 ### Frontend
 
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
@@ -129,13 +218,19 @@ npm run dev
 
 ## Docker
 
-```bash
+```powershell
 docker compose up --build
 ```
 
-## Proximos passos recomendados
+## Estado atual
 
-1. Conectar as rotas modulares a provedores reais por jogo.
-2. Criar persistencia para favoritos, activity feed e memberships de times.
-3. Adicionar testes automatizados de API e frontend.
-4. Evoluir o admin para moderacao e curadoria de integracoes.
+- frontend multi-game refatorado e compilando em build de producao
+- backend reorganizado com envelopes padronizados e novos modulos
+- validacao automatica do backend ainda depende de executar o interpretador Python fora das restricoes do sandbox
+
+## Proximos passos naturais
+
+1. Persistir de fato favoritos, feed, historico e comparativos com dados reais.
+2. Adicionar testes automatizados de API e frontend.
+3. Introduzir integracoes reais por provider em cada modulo.
+4. Publicar a base no GitHub e configurar CI.

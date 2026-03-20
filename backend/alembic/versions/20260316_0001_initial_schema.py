@@ -64,6 +64,17 @@ def upgrade() -> None:
     )
 
     op.create_table(
+        "favorites",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column("target_type", sa.String(length=50), nullable=False),
+        sa.Column("target_id", sa.Integer(), nullable=False),
+        sa.Column("note", sa.Text(), nullable=True),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+    )
+
+    op.create_table(
         "follows",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("follower_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=False),
@@ -71,6 +82,19 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.UniqueConstraint("follower_id", "following_id", name="uq_follows_pair"),
+    )
+
+    op.create_table(
+        "activity_events",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("actor_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=True),
+        sa.Column("verb", sa.String(length=50), nullable=False),
+        sa.Column("entity_type", sa.String(length=50), nullable=False),
+        sa.Column("entity_id", sa.Integer(), nullable=True),
+        sa.Column("summary", sa.Text(), nullable=False),
+        sa.Column("metadata_json", sa.JSON(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
 
     op.create_table(
@@ -148,6 +172,7 @@ def upgrade() -> None:
         sa.Column("current_rank", sa.String(length=50), nullable=False),
         sa.Column("main_hero", sa.String(length=80), nullable=False),
         sa.Column("role_stats", sa.JSON(), nullable=False),
+        sa.Column("hero_stats", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
@@ -159,6 +184,7 @@ def upgrade() -> None:
         sa.Column("current_rank", sa.String(length=50), nullable=False),
         sa.Column("favorite_agents", sa.JSON(), nullable=False),
         sa.Column("core_stats", sa.JSON(), nullable=False),
+        sa.Column("weapon_stats", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
@@ -170,6 +196,32 @@ def upgrade() -> None:
         sa.Column("current_rank", sa.String(length=50), nullable=False),
         sa.Column("kd", sa.Float(), nullable=False),
         sa.Column("hs_percentage", sa.Float(), nullable=False),
+        sa.Column("weapon_stats", sa.JSON(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+    )
+
+    op.create_table(
+        "lol_profiles",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("game_profile_id", sa.Integer(), sa.ForeignKey("game_profiles.id"), nullable=False, unique=True),
+        sa.Column("current_elo", sa.String(length=60), nullable=False),
+        sa.Column("primary_role", sa.String(length=40), nullable=False),
+        sa.Column("champion_pool", sa.JSON(), nullable=False),
+        sa.Column("core_stats", sa.JSON(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+    )
+
+    op.create_table(
+        "fortnite_profiles",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("game_profile_id", sa.Integer(), sa.ForeignKey("game_profiles.id"), nullable=False, unique=True),
+        sa.Column("platform", sa.String(length=40), nullable=False),
+        sa.Column("victories", sa.Integer(), nullable=False),
+        sa.Column("kills", sa.Integer(), nullable=False),
+        sa.Column("kd", sa.Float(), nullable=False),
+        sa.Column("mode_breakdown", sa.JSON(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
@@ -177,16 +229,20 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     for table_name in [
+        "fortnite_profiles",
+        "lol_profiles",
         "cs2_profiles",
         "valorant_profiles",
         "overwatch_profiles",
         "game_matches",
         "game_stats",
         "game_profiles",
+        "activity_events",
         "badges",
         "tournaments",
         "teams",
         "follows",
+        "favorites",
         "comment_likes",
         "comments",
         "profiles",

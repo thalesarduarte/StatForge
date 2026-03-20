@@ -6,6 +6,7 @@ export type CoreMetric = {
 
 export type GameModuleSummary = {
   name: string;
+  path: string;
   description: string;
   highlights: string[];
 };

@@ -1,4 +1,4 @@
-from sqlalchemy import Float, ForeignKey, String
+from sqlalchemy import Float, ForeignKey, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base_class import Base
@@ -13,3 +13,4 @@ class CS2Profile(Base, TimestampMixin):
     current_rank: Mapped[str] = mapped_column(String(50))
     kd: Mapped[float] = mapped_column(Float, default=0.0)
     hs_percentage: Mapped[float] = mapped_column(Float, default=0.0)
+    weapon_stats: Mapped[dict] = mapped_column(JSON, default=dict)

@@ -32,70 +32,55 @@ type HistoryResponse = ListEnvelope<{
   stats: Record<string, string | number>;
 }>;
 
-const fallback: GameModulePageData = {
-  slug: "lol",
-  title: "League of Legends",
-  strapline: "MOBA module",
-  description:
-    "Modulo isolado para invocador, elo, champions, roles, KDA, winrate, comparacao e historico recente.",
-  trackedHandle: "midcontrol",
-  statCards: [
-    { label: "Elo", value: "Emerald II", tone: "accent" },
-    { label: "Role", value: "Mid" },
-    { label: "KDA", value: "3.9" },
-    { label: "Winrate", value: "56.1%", tone: "warm" },
-  ],
-  highlights: ["Champion pool", "Role tracking", "SoloQ history"],
-  comparisonRows: [],
-  historyRows: [],
-  referenceGroups: [],
-};
+type SyncResponse = ApiEnvelope<{ handle: string }>;
 
-export async function getLolModuleData(): Promise<GameModulePageData> {
-  try {
-    const [overview, referenceData, comparison, history] = await Promise.all([
-      apiFetch<OverviewResponse>("/modules/lol/overview/midcontrol"),
-      apiFetch<ReferenceResponse>("/modules/lol/reference-data"),
-      apiFetch<ComparisonResponse>("/modules/lol/compare/midcontrol/rivalmid"),
-      apiFetch<HistoryResponse>("/modules/lol/history/midcontrol"),
-    ]);
+export async function syncLolProfile(gameName: string, tagLine: string, region: string) {
+  return apiFetch<SyncResponse>("/modules/lol/sync", {
+    method: "POST",
+    body: JSON.stringify({ game_name: gameName, tag_line: tagLine, region }),
+  });
+}
 
-    return {
-      slug: "lol",
-      title: "League of Legends",
-      strapline: "MOBA module",
-      description:
-        "Modulo isolado para invocador, elo, champions, roles, KDA, winrate, comparacao e historico recente.",
-      trackedHandle: overview.data.summoner_name,
-      statCards: [
-        { label: "Elo", value: overview.data.elo, tone: "accent" },
-        { label: "Server", value: overview.data.server },
-        { label: "Role", value: overview.data.primary_role },
-        { label: "Winrate", value: `${overview.data.core_stats.winrate}%`, tone: "warm" },
-      ],
-      highlights: overview.data.recent_highlights,
-      comparisonRows: Object.entries(comparison.data.metrics).map(([label, metric]) => ({
-        label,
-        left: String(metric.left),
-        right: String(metric.right),
-        better: metric.better,
-      })),
-      historyRows: history.items.map((entry) => ({
-        id: entry.match_id,
-        result: entry.result,
-        mode: entry.mode,
-        map: entry.map_name,
-        playedAt: new Date(entry.played_at).toLocaleString("pt-BR"),
-        stats: Object.entries(entry.stats).map(([label, value]) => ({ label, value: String(value) })),
-      })),
-      referenceGroups: [
-        { label: "Maps", items: referenceData.data.maps },
-        { label: "Roles", items: referenceData.data.roles_or_modes },
-        { label: "Champions", items: referenceData.data.roster_or_characters },
-        { label: "Elo bands", items: referenceData.data.ranks },
-      ],
-    };
-  } catch {
-    return fallback;
-  }
+export async function getLolModuleData(handle: string): Promise<GameModulePageData> {
+  const [overview, referenceData, comparison, history] = await Promise.all([
+    apiFetch<OverviewResponse>(`/modules/lol/overview/${encodeURIComponent(handle)}`),
+    apiFetch<ReferenceResponse>("/modules/lol/reference-data"),
+    apiFetch<ComparisonResponse>(`/modules/lol/compare/${encodeURIComponent(handle)}/${encodeURIComponent(handle)}`),
+    apiFetch<HistoryResponse>(`/modules/lol/history/${encodeURIComponent(handle)}`),
+  ]);
+
+  return {
+    slug: "lol",
+    title: "League of Legends",
+    strapline: "MOBA module",
+    description: "Sincronizacao real via Riot API com snapshots de elo, pool de champions e ultimas partidas.",
+    trackedHandle: overview.data.summoner_name,
+    statCards: [
+      { label: "Elo", value: overview.data.elo, tone: "accent" },
+      { label: "Server", value: overview.data.server },
+      { label: "Role", value: overview.data.primary_role },
+      { label: "Winrate", value: `${overview.data.core_stats.winrate}%`, tone: "warm" },
+    ],
+    highlights: overview.data.recent_highlights,
+    comparisonRows: Object.entries(comparison.data.metrics).map(([label, metric]) => ({
+      label,
+      left: String(metric.left),
+      right: String(metric.right),
+      better: metric.better,
+    })),
+    historyRows: history.items.map((entry) => ({
+      id: entry.match_id,
+      result: entry.result,
+      mode: String(entry.mode),
+      map: entry.map_name,
+      playedAt: new Date(entry.played_at).toLocaleString("pt-BR"),
+      stats: Object.entries(entry.stats).map(([label, value]) => ({ label, value: String(value) })),
+    })),
+    referenceGroups: [
+      { label: "Maps", items: referenceData.data.maps },
+      { label: "Roles", items: referenceData.data.roles_or_modes },
+      { label: "Champions", items: referenceData.data.roster_or_characters },
+      { label: "Ranks", items: referenceData.data.ranks },
+    ],
+  };
 }

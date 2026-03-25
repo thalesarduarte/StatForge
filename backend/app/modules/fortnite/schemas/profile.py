@@ -25,3 +25,8 @@ class FortniteHistoryEntry(MatchHistoryEntry):
 
 class FortniteReferenceData(ReferenceData):
     pass
+
+
+class FortniteSyncRequest(BaseModel):
+    name: str
+    account_type: str = "epic"

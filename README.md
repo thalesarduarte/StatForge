@@ -1,6 +1,6 @@
 # StatForge
 
-StatForge e um hub gamer multi-jogos com core compartilhado e modulos independentes por jogo. A plataforma foi organizada para escalar sem acoplamento indevido entre regras de Overwatch, Valorant, CS2, LoL e Fortnite.
+StatForge e um hub gamer multi-jogos com core compartilhado e modulos independentes por jogo. A plataforma foi organizada para escalar sem acoplamento indevido entre regras de Overwatch, Valorant, CS2, LoL e Fortnite e agora possui camada de integracao com providers reais por modulo.
 
 ## Stack
 
@@ -53,6 +53,7 @@ frontend/
 - Rotas, services, schemas, integracoes e componentes de cada jogo evoluem sem contaminar outros modulos.
 - Responses da API seguem envelope padronizado.
 - Frontend e backend continuam desacoplados e preparados para crescimento independente.
+- Dados sincronizados ficam persistidos em `game_profiles`, `game_stats` e `game_matches`.
 
 ## Core compartilhado
 
@@ -133,10 +134,25 @@ Dominios cobertos na base atual:
 - historico
 - comparacao entre jogadores
 
+## Providers reais por modulo
+
+- Overwatch: OverFast API
+- Valorant: HenrikDev API + Valorant-API para conteudo estatico
+- CS2: FACEIT Data API
+- LoL: Riot API + Data Dragon
+- Fortnite: Fortnite-API
+
+Observacoes:
+
+- alguns providers exigem chave de API obrigatoria via `.env`
+- historico recente depende do que o provider realmente expoe
+- Overwatch e Fortnite podem ter historico mais limitado que LoL, Valorant e CS2
+
 ## Backend
 
 Padrao de endpoints por modulo:
 
+- `POST /api/v1/modules/<game>/sync`
 - `GET /api/v1/modules/<game>/overview/{handle}`
 - `GET /api/v1/modules/<game>/compare/{left}/{right}`
 - `GET /api/v1/modules/<game>/reference-data`
@@ -194,7 +210,8 @@ O frontend foi reorganizado como hub multi-game:
 - pagina separada para cada jogo
 - hooks e services isolados por modulo
 - renderer compartilhado para paginas de jogo
-- integracao pronta para TanStack Query com fallback local
+- sincronizacao real por formulario em cada modulo
+- consumo da API com TanStack Query e estados de loading / erro / vazio
 
 ## Ambiente local
 
@@ -208,12 +225,24 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+Antes de subir o backend, configure as chaves reais no `.env`:
+
+```powershell
+copy .env.example .env
+```
+
 ### Frontend
 
 ```powershell
 cd frontend
 npm install
 npm run dev
+```
+
+Tambem configure:
+
+```powershell
+copy .env.example .env
 ```
 
 ## Docker
@@ -225,12 +254,13 @@ docker compose up --build
 ## Estado atual
 
 - frontend multi-game refatorado e compilando em build de producao
-- backend reorganizado com envelopes padronizados e novos modulos
-- validacao automatica do backend ainda depende de executar o interpretador Python fora das restricoes do sandbox
+- backend reorganizado com envelopes padronizados, sync por provider e persistencia compartilhada
+- import do backend validado com sucesso
+- algumas integracoes dependem diretamente de chaves reais configuradas no `.env`
 
 ## Proximos passos naturais
 
-1. Persistir de fato favoritos, feed, historico e comparativos com dados reais.
-2. Adicionar testes automatizados de API e frontend.
-3. Introduzir integracoes reais por provider em cada modulo.
-4. Publicar a base no GitHub e configurar CI.
+1. Adicionar refresh assinado, cache e jobs de sincronizacao periodica.
+2. Persistir de fato favoritos, feed e moderacao do core com banco real.
+3. Criar testes automatizados para adapters externos e fluxos de sync.
+4. Publicar a base no GitHub, configurar CI e preparar deploy do frontend no Netlify.

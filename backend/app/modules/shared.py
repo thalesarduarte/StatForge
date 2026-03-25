@@ -23,3 +23,17 @@ class ReferenceData(BaseModel):
     roles_or_modes: list[str]
     roster_or_characters: list[str]
     ranks: list[str]
+
+
+class SyncStatus(BaseModel):
+    game_slug: str
+    handle: str
+    provider: str
+    synced_at: datetime
+
+
+class SearchResult(BaseModel):
+    handle: str
+    display_name: str
+    platform_or_region: str | None = None
+    external_player_id: str | None = None

@@ -27,3 +27,7 @@ class CS2HistoryEntry(MatchHistoryEntry):
 
 class CS2ReferenceData(ReferenceData):
     pass
+
+
+class CS2SyncRequest(BaseModel):
+    nickname: str

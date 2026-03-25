@@ -32,70 +32,55 @@ type HistoryResponse = ListEnvelope<{
   stats: Record<string, string | number>;
 }>;
 
-const fallback: GameModulePageData = {
-  slug: "fortnite",
-  title: "Fortnite",
-  strapline: "Battle royale module",
-  description:
-    "Modulo isolado para perfil, partidas, vitorias, kills, KD, modos, historico e comparacao entre jogadores.",
-  trackedHandle: "stormrider",
-  statCards: [
-    { label: "Victories", value: "112", tone: "accent" },
-    { label: "Kills", value: "1843" },
-    { label: "KD", value: "3.14" },
-    { label: "Platform", value: "Epic", tone: "warm" },
-  ],
-  highlights: ["Battle Royale", "Zero Build", "Session history"],
-  comparisonRows: [],
-  historyRows: [],
-  referenceGroups: [],
-};
+type SyncResponse = ApiEnvelope<{ handle: string }>;
 
-export async function getFortniteModuleData(): Promise<GameModulePageData> {
-  try {
-    const [overview, referenceData, comparison, history] = await Promise.all([
-      apiFetch<OverviewResponse>("/modules/fortnite/overview/stormrider"),
-      apiFetch<ReferenceResponse>("/modules/fortnite/reference-data"),
-      apiFetch<ComparisonResponse>("/modules/fortnite/compare/stormrider/rivaldrop"),
-      apiFetch<HistoryResponse>("/modules/fortnite/history/stormrider"),
-    ]);
+export async function syncFortniteProfile(name: string, accountType: string) {
+  return apiFetch<SyncResponse>("/modules/fortnite/sync", {
+    method: "POST",
+    body: JSON.stringify({ name, account_type: accountType }),
+  });
+}
 
-    return {
-      slug: "fortnite",
-      title: "Fortnite",
-      strapline: "Battle royale module",
-      description:
-        "Modulo isolado para perfil, partidas, vitorias, kills, KD, modos, historico e comparacao entre jogadores.",
-      trackedHandle: overview.data.handle,
-      statCards: [
-        { label: "Victories", value: String(overview.data.victories), tone: "accent" },
-        { label: "Kills", value: String(overview.data.kills) },
-        { label: "KD", value: String(overview.data.kd) },
-        { label: "Platform", value: overview.data.platform, tone: "warm" },
-      ],
-      highlights: overview.data.recent_highlights,
-      comparisonRows: Object.entries(comparison.data.metrics).map(([label, metric]) => ({
-        label,
-        left: String(metric.left),
-        right: String(metric.right),
-        better: metric.better,
-      })),
-      historyRows: history.items.map((entry) => ({
-        id: entry.match_id,
-        result: entry.result,
-        mode: entry.mode,
-        map: entry.map_name,
-        playedAt: new Date(entry.played_at).toLocaleString("pt-BR"),
-        stats: Object.entries(entry.stats).map(([label, value]) => ({ label, value: String(value) })),
-      })),
-      referenceGroups: [
-        { label: "Maps", items: referenceData.data.maps },
-        { label: "Modes", items: referenceData.data.roles_or_modes },
-        { label: "Key loadout", items: referenceData.data.roster_or_characters },
-        { label: "Rank bands", items: referenceData.data.ranks },
-      ],
-    };
-  } catch {
-    return fallback;
-  }
+export async function getFortniteModuleData(handle: string): Promise<GameModulePageData> {
+  const [overview, referenceData, comparison, history] = await Promise.all([
+    apiFetch<OverviewResponse>(`/modules/fortnite/overview/${encodeURIComponent(handle)}`),
+    apiFetch<ReferenceResponse>("/modules/fortnite/reference-data"),
+    apiFetch<ComparisonResponse>(`/modules/fortnite/compare/${encodeURIComponent(handle)}/${encodeURIComponent(handle)}`),
+    apiFetch<HistoryResponse>(`/modules/fortnite/history/${encodeURIComponent(handle)}`),
+  ]);
+
+  return {
+    slug: "fortnite",
+    title: "Fortnite",
+    strapline: "Battle royale module",
+    description: "Sincronizacao real via Fortnite-API com stats lifetime e playlists como referencia.",
+    trackedHandle: overview.data.handle,
+    statCards: [
+      { label: "Victories", value: String(overview.data.victories), tone: "accent" },
+      { label: "Kills", value: String(overview.data.kills) },
+      { label: "KD", value: String(overview.data.kd) },
+      { label: "Platform", value: overview.data.platform, tone: "warm" },
+    ],
+    highlights: overview.data.recent_highlights,
+    comparisonRows: Object.entries(comparison.data.metrics).map(([label, metric]) => ({
+      label,
+      left: String(metric.left),
+      right: String(metric.right),
+      better: metric.better,
+    })),
+    historyRows: history.items.map((entry) => ({
+      id: entry.match_id,
+      result: entry.result,
+      mode: entry.mode,
+      map: entry.map_name,
+      playedAt: new Date(entry.played_at).toLocaleString("pt-BR"),
+      stats: Object.entries(entry.stats).map(([label, value]) => ({ label, value: String(value) })),
+    })),
+    referenceGroups: [
+      { label: "Maps", items: referenceData.data.maps },
+      { label: "Modes", items: referenceData.data.roles_or_modes },
+      { label: "Loadout", items: referenceData.data.roster_or_characters },
+      { label: "Ranks", items: referenceData.data.ranks },
+    ],
+  };
 }

@@ -32,70 +32,56 @@ type HistoryResponse = ListEnvelope<{
   stats: Record<string, string | number>;
 }>;
 
-const fallback: GameModulePageData = {
-  slug: "valorant",
-  title: "Valorant",
-  strapline: "Tactical shooter module",
-  description:
-    "Modulo isolado para perfil, rank, agents, armas, HS%, KDA, winrate, comparacao entre jogadores e historico recente.",
-  trackedHandle: "opticnova",
-  statCards: [
-    { label: "Rank", value: "Ascendant 3", tone: "accent" },
-    { label: "HS%", value: "27.8%" },
-    { label: "KDA", value: "1.42" },
-    { label: "Winrate", value: "54.6%", tone: "warm" },
-  ],
-  highlights: ["Agents", "Weapons", "Competitive history"],
-  comparisonRows: [],
-  historyRows: [],
-  referenceGroups: [],
-};
+type SyncResponse = ApiEnvelope<{ handle: string }>;
 
-export async function getValorantModuleData(): Promise<GameModulePageData> {
-  try {
-    const [overview, referenceData, comparison, history] = await Promise.all([
-      apiFetch<OverviewResponse>("/modules/valorant/overview/opticnova"),
-      apiFetch<ReferenceResponse>("/modules/valorant/reference-data"),
-      apiFetch<ComparisonResponse>("/modules/valorant/compare/opticnova/rivalop"),
-      apiFetch<HistoryResponse>("/modules/valorant/history/opticnova"),
-    ]);
+export async function syncValorantProfile(name: string, tag: string, region: string) {
+  return apiFetch<SyncResponse>("/modules/valorant/sync", {
+    method: "POST",
+    body: JSON.stringify({ name, tag, region }),
+  });
+}
 
-    return {
-      slug: "valorant",
-      title: "Valorant",
-      strapline: "Tactical shooter module",
-      description:
-        "Modulo isolado para perfil, rank, agents, armas, HS%, KDA, winrate, comparacao entre jogadores e historico recente.",
-      trackedHandle: overview.data.handle,
-      statCards: [
-        { label: "Rank", value: overview.data.rank, tone: "accent" },
-        { label: "Region", value: overview.data.region },
-        { label: "HS%", value: `${overview.data.core_stats.hs_percentage}%` },
-        { label: "Winrate", value: `${overview.data.core_stats.winrate}%`, tone: "warm" },
-      ],
-      highlights: overview.data.recent_highlights,
-      comparisonRows: Object.entries(comparison.data.metrics).map(([label, metric]) => ({
-        label,
-        left: String(metric.left),
-        right: String(metric.right),
-        better: metric.better,
-      })),
-      historyRows: history.items.map((entry) => ({
-        id: entry.match_id,
-        result: entry.result,
-        mode: entry.mode,
-        map: entry.map_name,
-        playedAt: new Date(entry.played_at).toLocaleString("pt-BR"),
-        stats: Object.entries(entry.stats).map(([label, value]) => ({ label, value: String(value) })),
-      })),
-      referenceGroups: [
-        { label: "Maps", items: referenceData.data.maps },
-        { label: "Roles / Modes", items: referenceData.data.roles_or_modes },
-        { label: "Agents", items: referenceData.data.roster_or_characters },
-        { label: "Ranks", items: referenceData.data.ranks },
-      ],
-    };
-  } catch {
-    return fallback;
-  }
+export async function getValorantModuleData(handle: string): Promise<GameModulePageData> {
+  const [overview, referenceData, comparison, history] = await Promise.all([
+    apiFetch<OverviewResponse>(`/modules/valorant/overview/${encodeURIComponent(handle)}`),
+    apiFetch<ReferenceResponse>("/modules/valorant/reference-data"),
+    apiFetch<ComparisonResponse>(`/modules/valorant/compare/${encodeURIComponent(handle)}/${encodeURIComponent(handle)}`),
+    apiFetch<HistoryResponse>(`/modules/valorant/history/${encodeURIComponent(handle)}`),
+  ]);
+
+  return {
+    slug: "valorant",
+    title: "Valorant",
+    strapline: "Tactical shooter module",
+    description:
+      "Sincronizacao real via HenrikDev para conta/MMR/matches e Valorant-API para agents, maps e weapons.",
+    trackedHandle: overview.data.handle,
+    statCards: [
+      { label: "Rank", value: overview.data.rank, tone: "accent" },
+      { label: "Region", value: overview.data.region },
+      { label: "HS%", value: `${overview.data.core_stats.hs_percentage}%` },
+      { label: "Winrate", value: `${overview.data.core_stats.winrate}%`, tone: "warm" },
+    ],
+    highlights: overview.data.recent_highlights,
+    comparisonRows: Object.entries(comparison.data.metrics).map(([label, metric]) => ({
+      label,
+      left: String(metric.left),
+      right: String(metric.right),
+      better: metric.better,
+    })),
+    historyRows: history.items.map((entry) => ({
+      id: entry.match_id,
+      result: entry.result,
+      mode: entry.mode,
+      map: entry.map_name,
+      playedAt: new Date(entry.played_at).toLocaleString("pt-BR"),
+      stats: Object.entries(entry.stats).map(([label, value]) => ({ label, value: String(value) })),
+    })),
+    referenceGroups: [
+      { label: "Maps", items: referenceData.data.maps },
+      { label: "Modes", items: referenceData.data.roles_or_modes },
+      { label: "Agents", items: referenceData.data.roster_or_characters },
+      { label: "Ranks", items: referenceData.data.ranks },
+    ],
+  };
 }

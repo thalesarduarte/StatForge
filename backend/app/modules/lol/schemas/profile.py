@@ -25,3 +25,9 @@ class LolHistoryEntry(MatchHistoryEntry):
 
 class LolReferenceData(ReferenceData):
     pass
+
+
+class LolSyncRequest(BaseModel):
+    game_name: str
+    tag_line: str
+    region: str

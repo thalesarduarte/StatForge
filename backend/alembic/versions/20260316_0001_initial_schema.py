@@ -132,12 +132,15 @@ def upgrade() -> None:
     op.create_table(
         "game_profiles",
         sa.Column("id", sa.Integer(), primary_key=True),
-        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=True),
         sa.Column("game_slug", sa.String(length=50), nullable=False),
         sa.Column("handle", sa.String(length=120), nullable=False),
+        sa.Column("display_name", sa.String(length=120), nullable=False),
+        sa.Column("provider_slug", sa.String(length=50), nullable=False),
         sa.Column("region", sa.String(length=30), nullable=True),
         sa.Column("external_player_id", sa.String(length=120), nullable=True),
         sa.Column("metadata_json", sa.JSON(), nullable=False),
+        sa.Column("last_synced_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )

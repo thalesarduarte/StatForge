@@ -79,29 +79,35 @@ export function GameModulePage({ data }: GameModulePageProps) {
 
       <Card>
         <p className="font-display text-2xl font-bold">Recent History</p>
-        <div className="mt-4 grid gap-3">
-          {data.historyRows.map((entry) => (
-            <div key={entry.id} className="rounded-3xl border border-border bg-white/80 p-4">
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="font-semibold text-slate-900">
-                    {entry.result} • {entry.mode}
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    {entry.map} • {entry.playedAt}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {entry.stats.map((stat) => (
-                    <span key={`${entry.id}-${stat.label}`} className="rounded-full bg-slate-100 px-3 py-1 text-sm">
-                      {stat.label}: {stat.value}
-                    </span>
-                  ))}
+        {data.historyRows.length === 0 ? (
+          <div className="mt-4 rounded-3xl bg-slate-100 p-4 text-sm text-slate-600">
+            O provider atual nao retornou historico recente para este perfil.
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-3">
+            {data.historyRows.map((entry) => (
+              <div key={entry.id} className="rounded-3xl border border-border bg-white/80 p-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      {entry.result} • {entry.mode}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {entry.map} • {entry.playedAt}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {entry.stats.map((stat) => (
+                      <span key={`${entry.id}-${stat.label}`} className="rounded-full bg-slate-100 px-3 py-1 text-sm">
+                        {stat.label}: {stat.value}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   );

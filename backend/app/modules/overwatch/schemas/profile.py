@@ -26,3 +26,7 @@ class OverwatchHistoryEntry(MatchHistoryEntry):
 
 class OverwatchReferenceData(ReferenceData):
     pass
+
+
+class OverwatchSyncRequest(BaseModel):
+    handle: str

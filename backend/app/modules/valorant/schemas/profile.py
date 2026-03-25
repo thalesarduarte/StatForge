@@ -25,3 +25,9 @@ class ValorantHistoryEntry(MatchHistoryEntry):
 
 class ValorantReferenceData(ReferenceData):
     pass
+
+
+class ValorantSyncRequest(BaseModel):
+    name: str
+    tag: str
+    region: str

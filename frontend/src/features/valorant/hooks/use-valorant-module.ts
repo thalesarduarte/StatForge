@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getValorantModuleData } from "@/features/valorant/services/valorant-service";
 
-export function useValorantModule() {
+export function useValorantModule(handle: string | null) {
   return useQuery({
-    queryKey: ["game-module", "valorant"],
-    queryFn: getValorantModuleData,
+    queryKey: ["game-module", "valorant", handle],
+    queryFn: () => getValorantModuleData(handle!),
+    enabled: Boolean(handle),
   });
 }
